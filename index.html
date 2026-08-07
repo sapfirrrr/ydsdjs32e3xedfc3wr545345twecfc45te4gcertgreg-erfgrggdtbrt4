@@ -1,0 +1,146 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Карта киосков — Братск</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+    <!-- Шапка -->
+    <div class="header">
+        <h1>Информационная система</h1>
+        <p>учета нестационарных торговых объектов</p>
+        <p class="sub">Комитет экономического развития</p>
+        <span class="header-made">сделано VK @gemas228</span>
+    </div>
+    <!-- Кнопки действий справа -->
+    <div class="action-buttons">
+        <button id="btn-cabinet">👤 Личный кабинет</button>
+        <button id="btn-place-nto">➕ Разместить своё НТО</button>
+    </div>
+    <!-- Панель управления -->
+    <div class="panel">
+        <input type="text" id="search" placeholder="🔍 Поиск киоска (номер или название)" />
+        <label class="filter">
+            <input type="checkbox" id="filter-expiring" />
+            До конца договора &lt; 1 года
+        </label>
+        <button id="showListBtn" style="
+            padding: 8px 16px;
+            background: #2e86c1;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        ">📋 Показать НТО списком</button>
+    </div>
+
+    <!-- Карта -->
+    <div id="map"></div>
+
+    <!-- Карточка киоска -->
+    <div id="card" class="card hidden">
+        <h3 id="card-name"></h3>
+        <p>Площадь: <span id="card-area"></span> м²</p>
+        <p>Специализация: <span id="card-specialization"></span></p>
+        <p>Договор до: <span id="card-contract"></span></p>
+        <p>До окончания: <span id="card-remaining"></span></p>
+        <p>Статус: <span id="card-status"></span>
+        <button id="card-rent-btn" style="display:none; margin-left:15px; padding:4px 12px; background:#e67e22; color:white; border:none; border-radius:4px; cursor:pointer; font-size:12px;">🏪 Хотите арендовать?</button></p>
+        <p><a id="card-2gis-link" href="#" target="_blank">📍 Открыть в 2ГИС (веб)</a>
+        <button id="how-to-find-btn" style="margin-left: 10px; padding: 4px 10px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">❓ Как найти тут точку?</button></p>
+        <p><a id="card-2gis-app-link" href="#">📱 Открыть в приложении 2ГИС</a></p>
+    </div>
+    <!-- Модальное окно со списком НТО -->
+    <div id="listModal" class="modal hidden">
+        <div class="modal-content">
+            <span id="closeModal" class="close">&times;</span>
+            <h2>Список всех НТО</h2>
+            <input type="text" id="listSearch" placeholder="🔍 Фильтр по названию или номеру" style="width: 100%; padding: 8px; margin: 10px 0; border: 1px solid #ccc; border-radius: 6px;" />
+            <div id="kioskListContainer" style="max-height: 400px; overflow-y: auto;">
+                <!-- Список будет заполняться скриптом -->
+            </div>
+        </div>
+    </div>
+    <!-- Модальное окно с подсказкой -->
+    <div id="helpModal" class="modal hidden">
+        <div class="modal-content" style="max-width: 500px;">
+            <span id="closeHelpModal" class="close">&times;</span>
+            <h3 style="margin-bottom: 15px;">📍 Как найти нужную точку?</h3>
+            <p style="font-size: 15px; line-height: 1.6;">
+                При переходе по ссылке 2ГИС показывает координаты точки, расположенной вблизи с интересующим НТО.
+                <br><br>
+                <strong>Чтобы точно определить объект:</strong>
+                <br>
+                1. Откройте ссылку в 2ГИС.
+                <br>
+                2. Увеличьте масштаб (прокрутите колёсико мыши).
+                <br>
+                3. Визуально найдите на карте нужный павильон/киоск — он будет находиться рядом с указанным местом.
+                <br><br>
+                Если вы знаете название НТО, можете также воспользоваться поиском внутри 2ГИС.
+            </p>
+        </div>
+    </div>
+    <!-- Модалка: Личный кабинет -->
+    <div id="loginModal" class="modal hidden">
+        <div class="modal-content" style="max-width: 400px;">
+            <span class="close" id="closeLoginModal">&times;</span>
+            <h3>🔐 Вход в личный кабинет</h3>
+            <div style="margin-top: 20px;">
+                <label style="display:block; margin-bottom:5px; font-weight:600;">Логин</label>
+                <input type="text" id="login-username" placeholder="Введите логин" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px; margin-bottom:15px;">
+                <label style="display:block; margin-bottom:5px; font-weight:600;">Пароль</label>
+                <input type="password" id="login-password" placeholder="Введите пароль" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px; margin-bottom:20px;">
+                <button id="login-submit" style="width:100%; padding:10px; background:#2e86c1; color:white; border:none; border-radius:4px; font-size:16px; cursor:pointer;">Войти</button>
+            </div>
+        </div>
+    </div>
+        <!-- Модалка: Разместить своё НТО -->
+    <div id="placeModal" class="modal hidden">
+        <div class="modal-content" style="max-width: 450px;">
+            <span class="close" id="closePlaceModal">&times;</span>
+            <h3>📝 Заявка на размещение НТО</h3>
+            <div style="margin-top: 20px;">
+                <label style="display:block; margin-bottom:5px; font-weight:600;">Ваше имя</label>
+                <input type="text" id="place-name" placeholder="Имя" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px; margin-bottom:15px;">
+                <label style="display:block; margin-bottom:5px; font-weight:600;">Электронная почта</label>
+                <input type="email" id="place-email" placeholder="email@example.com" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px; margin-bottom:15px;">
+                <label style="display:block; margin-bottom:5px; font-weight:600;">Комментарий</label>
+                <textarea id="place-comment" rows="3" placeholder="Ваши пожелания..." style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px; margin-bottom:20px; resize:vertical;"></textarea>
+                <button id="place-submit" style="width:100%; padding:10px; background:#27ae60; color:white; border:none; border-radius:4px; font-size:16px; cursor:pointer;">Отправить заявку</button>
+            </div>
+        </div>
+    </div>
+        <!-- Модалка: Аренда -->
+    <div id="rentModal" class="modal hidden">
+        <div class="modal-content" style="max-width: 400px;">
+            <span class="close" id="closeRentModal">&times;</span>
+            <h3>📞 Аренда НТО</h3>
+            <p style="font-size:16px; margin:20px 0; line-height:1.6;">
+                Звоните в рабочее время по этому номеру:<br>
+                <strong style="font-size:20px; color:#2e86c1;">8 (908) 648-76-14</strong>
+            </p>
+            <button id="rent-close-btn" style="width:100%; padding:10px; background:#95a5a6; color:white; border:none; border-radius:4px; font-size:16px; cursor:pointer;">Закрыть</button>
+        </div>
+    </div>
+
+    <!-- Плавающее окно: Хотите ТУТ сделать НТО? -->
+    <div id="placeHerePopup" class="floating-popup hidden">
+        <div class="popup-content">
+            <h3>📍 Хотите ТУТ сделать НТО?</h3>
+            <p>Вы можете разместить НТО в этом месте.</p>
+            <button id="popup-yes" style="padding: 8px 20px; background: #27ae60; color: white; border: none; border-radius: 4px; cursor: pointer;">Да</button>
+            <button id="popup-no" style="padding: 8px 20px; background: #95a5a6; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px;">Отмена</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+
+</body>
+</html>

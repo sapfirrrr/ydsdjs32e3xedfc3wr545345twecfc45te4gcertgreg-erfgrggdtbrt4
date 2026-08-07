@@ -1,0 +1,315 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    width: 100%;
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+/* Карта — на весь экран */
+#map {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+/* Шапка */
+.header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: linear-gradient(135deg, #1a5276, #2e86c1);
+    color: white;
+    padding: 12px 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+
+    .header h1 {
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    .header p {
+        font-size: 12px;
+        opacity: 0.9;
+    }
+
+    .header .sub {
+        font-size: 11px;
+        opacity: 0.7;
+    }
+
+/* Панель */
+.panel {
+    position: fixed;
+    top: 90px;
+    left: 20px;
+    z-index: 1000;
+    background: white;
+    padding: 12px 16px;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+    .panel input[type="text"] {
+        padding: 8px 12px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 14px;
+        width: 220px;
+        outline: none;
+    }
+
+        .panel input[type="text"]:focus {
+            border-color: #2e86c1;
+        }
+
+.filter {
+    font-size: 13px;
+    color: #333;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Карточка */
+.card {
+    position: fixed;
+    bottom: 30px;
+    left: 20px;
+    z-index: 1000;
+    background: white;
+    padding: 18px 22px;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+    min-width: 260px;
+    border-left: 5px solid #2e86c1;
+}
+
+    .card h3 {
+        margin-bottom: 10px;
+        font-size: 16px;
+        color: #1a5276;
+    }
+
+    .card p {
+        font-size: 14px;
+        margin-bottom: 6px;
+        color: #444;
+    }
+
+    .card .status-free {
+        color: #27ae60;
+        font-weight: bold;
+    }
+
+    .card .status-taken {
+        color: #e74c3c;
+        font-weight: bold;
+    }
+
+.hidden {
+    display: none !important;
+}
+/* Модальное окно */
+.modal {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.modal-content {
+    background: white;
+    padding: 25px 30px;
+    border-radius: 12px;
+    max-width: 700px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+.close {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #aaa;
+}
+.close:hover { color: #333; }
+
+/* Элемент списка */
+.kiosk-item {
+    padding: 10px 12px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.kiosk-item:hover {
+    background: #f0f8ff;
+}
+.kiosk-item .name {
+    font-weight: 600;
+    color: #1a5276;
+}
+.kiosk-item .detail {
+    font-size: 13px;
+    color: #555;
+    margin-top: 4px;
+}
+.kiosk-item .status-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: bold;
+    margin-left: 10px;
+}
+.status-badge.free {
+    background: #d5f5e3;
+    color: #27ae60;
+}
+.status-badge.taken {
+    background: #fadbd8;
+    color: #e74c3c;
+}
+/* Скрываем названия улиц, POI и прочие подписи на карте OSM */
+.leaflet-tile-pane img {
+    filter: brightness(0.95) contrast(1.1);
+}
+
+/* Это маскирует текстовые слои OSM (работает не везде, но часто помогает) */
+.leaflet-tile-pane .leaflet-tile {
+    filter: saturate(0.8);
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.3); opacity: 0.7; }
+    100% { transform: scale(1); opacity: 1; }
+}
+/* Блок с кнопками действий (справа сверху) */
+.action-buttons {
+    position: fixed;
+    top: 70px;
+    right: 20px;
+    z-index: 1000;
+    display: flex;
+    gap: 10px;
+}
+.action-buttons button {
+    padding: 8px 16px;
+    background: #27ae60;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    transition: background 0.2s;
+}
+.action-buttons button:hover {
+    background: #229954;
+}
+.action-buttons #btn-cabinet {
+    background: #2ecc71;
+}
+.action-buttons #btn-cabinet:hover {
+    background: #27ae60;
+}
+.action-buttons #btn-place-nto {
+    background: #f39c12;
+}
+.action-buttons #btn-place-nto:hover {
+    background: #e67e22;
+}
+
+/* Модалки (уже есть общие, но переопределим для простоты) */
+.modal-content input,
+.modal-content textarea {
+    box-sizing: border-box;
+}
+/* Плавающее окно (не блокирующее) — справа по середине */
+.floating-popup {
+    position: fixed;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: white;
+    padding: 20px 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    z-index: 1500;
+    max-width: 320px;
+    width: 90%;
+    text-align: center;
+    pointer-events: auto; /* чтобы можно было кликать по кнопкам */
+}
+.floating-popup.hidden {
+    display: none;
+}
+.floating-popup .popup-content h3 {
+    margin-bottom: 10px;
+    color: #2c3e50;
+    font-size: 18px;
+}
+.floating-popup .popup-content p {
+    margin-bottom: 20px;
+    color: #555;
+    font-size: 14px;
+}
+.floating-popup .popup-content button {
+    padding: 8px 24px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.floating-popup .popup-content button#popup-yes {
+    background: #27ae60;
+    color: white;
+}
+.floating-popup .popup-content button#popup-yes:hover {
+    background: #1e8449;
+}
+.floating-popup .popup-content button#popup-no {
+    background: #95a5a6;
+    color: white;
+    margin-left: 10px;
+}
+.floating-popup .popup-content button#popup-no:hover {
+    background: #7f8c8d;
+}
+
+.header .header-made {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: white;
+    font-size: 14px;
+    opacity: 0.8;
+    font-weight: normal;
+    white-space: nowrap;
+}
