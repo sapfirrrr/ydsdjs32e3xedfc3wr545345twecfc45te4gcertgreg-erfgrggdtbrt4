@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -18,27 +18,63 @@
         <p class="sub">Комитет экономического развития</p>
         <span class="header-made">сделано VK @gemas228</span>
     </div>
+
     <!-- Кнопки действий справа -->
     <div class="action-buttons">
-        <button id="btn-cabinet">👤 Личный кабинет</button>
-        <button id="btn-place-nto">➕ Разместить своё НТО</button>
+        <button id="btn-cabinet" onclick="openLoginModal()">👤 Личный кабинет</button>
+        <button id="btn-place-nto" onclick="openPlaceModal()">➕ Разместить своё НТО</button>
     </div>
+
     <!-- Панель управления -->
     <div class="panel">
-        <input type="text" id="search" placeholder="🔍 Поиск киоска (номер или название)" />
-        <label class="filter">
-            <input type="checkbox" id="filter-expiring" />
-            До конца договора &lt; 1 года
-        </label>
-        <button id="showListBtn" style="
-            padding: 8px 16px;
-            background: #2e86c1;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-        ">📋 Показать НТО списком</button>
+        <div class="panel-row">
+            <input type="text" id="search" placeholder="🔍 Поиск киоска (номер или название)" />
+            <button id="toggleFiltersBtn" class="filter-toggle">⚙️ Расширенный фильтр</button>
+            <button id="resetFiltersBtn" class="filter-toggle" style="background:#e74c3c;">✖ Сбросить</button>
+        </div>
+
+        <!-- Блок расширенных фильтров (скрыт по умолчанию) -->
+        <div id="advancedFilters" class="advanced-filters hidden">
+            <div class="filter-group">
+                <label>Статус</label>
+                <select id="filter-status">
+                    <option value="all">Все</option>
+                    <option value="free">Свободен</option>
+                    <option value="taken">Занят</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label>Специализация</label>
+                <select id="filter-specialization">
+                    <option value="all">Все</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label>Площадь, м²</label>
+                <div class="range-inputs">
+                    <input type="number" id="filter-area-min" placeholder="от" min="0" step="1" />
+                    <span>—</span>
+                    <input type="number" id="filter-area-max" placeholder="до" min="0" step="1" />
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <label>Срок договора</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="contract-term" value="all" checked /> Все</label>
+                    <label><input type="radio" name="contract-term" value="less1" /> &lt; 1 года</label>
+                    <label><input type="radio" name="contract-term" value="1to3" /> 1–3 года</label>
+                    <label><input type="radio" name="contract-term" value="more3" /> &gt; 3 лет</label>
+                    <label><input type="radio" name="contract-term" value="expired" /> Истёк / нет договора</label>
+                </div>
+            </div>
+
+            <div class="filter-group" style="justify-content:flex-end;">
+                <button id="applyFiltersBtn" class="filter-apply">Применить</button>
+            </div>
+        </div>
     </div>
 
     <!-- Карта -->
@@ -57,6 +93,7 @@
         <button id="how-to-find-btn" style="margin-left: 10px; padding: 4px 10px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">❓ Как найти тут точку?</button></p>
         <p><a id="card-2gis-app-link" href="#">📱 Открыть в приложении 2ГИС</a></p>
     </div>
+
     <!-- Модальное окно со списком НТО -->
     <div id="listModal" class="modal hidden">
         <div class="modal-content">
@@ -68,6 +105,7 @@
             </div>
         </div>
     </div>
+
     <!-- Модальное окно с подсказкой -->
     <div id="helpModal" class="modal hidden">
         <div class="modal-content" style="max-width: 500px;">
@@ -88,10 +126,12 @@
             </p>
         </div>
     </div>
+
     <!-- Модалка: Личный кабинет -->
     <div id="loginModal" class="modal hidden">
         <div class="modal-content" style="max-width: 400px;">
-            <span class="close" id="closeLoginModal">&times;</span>
+            <!-- 👇 сюда добавили onclick -->
+            <span class="close" id="closeLoginModal" onclick="closeLoginModal()">&times;</span>
             <h3>🔐 Вход в личный кабинет</h3>
             <div style="margin-top: 20px;">
                 <label style="display:block; margin-bottom:5px; font-weight:600;">Логин</label>
@@ -102,10 +142,12 @@
             </div>
         </div>
     </div>
-        <!-- Модалка: Разместить своё НТО -->
+
+    <!-- Модалка: Разместить своё НТО -->
     <div id="placeModal" class="modal hidden">
         <div class="modal-content" style="max-width: 450px;">
-            <span class="close" id="closePlaceModal">&times;</span>
+            <!-- 👇 сюда добавили onclick -->
+            <span class="close" id="closePlaceModal" onclick="closePlaceModal()">&times;</span>
             <h3>📝 Заявка на размещение НТО</h3>
             <div style="margin-top: 20px;">
                 <label style="display:block; margin-bottom:5px; font-weight:600;">Ваше имя</label>
@@ -118,7 +160,8 @@
             </div>
         </div>
     </div>
-        <!-- Модалка: Аренда -->
+
+    <!-- Модалка: Аренда -->
     <div id="rentModal" class="modal hidden">
         <div class="modal-content" style="max-width: 400px;">
             <span class="close" id="closeRentModal">&times;</span>
@@ -140,7 +183,7 @@
             <button id="popup-no" style="padding: 8px 20px; background: #95a5a6; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px;">Отмена</button>
         </div>
     </div>
-    <script src="script.js"></script>
 
+    <script src="script.js"></script>
 </body>
 </html>
